@@ -1,0 +1,19 @@
+{
+  "currentUserId": "0",
+  "userId": "2",
+  "userName": "mama",
+  "fullName": "Nadeema Akhter",
+  "dateOfBirth": "1972-02-01",
+  "gender": "Female",
+  "emailAddress": "nadeema@gmail.com",
+  "password": "1234",
+  "bioDetails": "Hello :)",
+  "userCreationDate": "2024-12-12T20:23:32.2688854",
+  "myPosts": [],
+  "friendRequestsSent": [],
+  "friendRequestsReceived": [],
+  "friendsList": [
+    "4",
+    "1"
+  ]
+}

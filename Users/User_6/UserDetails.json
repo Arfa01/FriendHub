@@ -1,0 +1,19 @@
+{
+  "userId": "6",
+  "userName": "qas",
+  "fullName": "W Riaz",
+  "dateOfBirth": "2002-01-20",
+  "gender": "Male",
+  "emailAddress": "w.riaz@gmail.com",
+  "password": "1234",
+  "bioDetails": "Im big bro",
+  "userCreationDate": "2024-12-14T13:47:59.9914853",
+  "myPosts": [
+    "1"
+  ],
+  "friendRequestsSent": [],
+  "friendRequestsReceived": [],
+  "friendsList": [
+    "4"
+  ]
+}

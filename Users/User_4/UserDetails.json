@@ -1,0 +1,25 @@
+{
+  "currentUserId": "0",
+  "userId": "4",
+  "userName": "arf",
+  "fullName": "Arfa Riaz",
+  "dateOfBirth": "2017-01-20",
+  "gender": "Female",
+  "emailAddress": "arfariaz@gmail.com",
+  "password": "1234",
+  "bioDetails": "making this project, hope it turns out good uwu ",
+  "userCreationDate": "2024-12-12T20:28:04.2012433",
+  "myPosts": [
+    "2"
+  ],
+  "friendRequestsSent": [
+    "1"
+  ],
+  "friendRequestsReceived": [],
+  "friendsList": [
+    "6",
+    "2",
+    "3",
+    "1"
+  ]
+}

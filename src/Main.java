@@ -4,13 +4,13 @@ import java.util.Scanner;
 
 public class Main {
     // Load users and posts at startup
-    ArrayList<UserClass> allUsers = UserClass.loadUsers(); // Call the load method to get users
+    static ArrayList<UserClass> allUsers = UserClass.loadUsers(); // Call the load method to get users
     ArrayList<Post> allPosts = Post.loadPosts(); // Call the load method to get posts
     private static Graph socialGraph = new Graph();  // Global graph object to manage friendships
-    private static List<UserClass> allUsers = new ArrayList<>(); // List to store all users
-
+    //private static List<UserClass> allUsers = new ArrayList<>(); // List to store all users
     public static void main(String[] args) {
-        loadAllUsers(); // Load all users on startup
+        UserClass.loadUsers(); // Load all users on startup
+        socialGraph.loadGraphFromFile();
         System.out.println("=== Welcome to Social Media App ===");
 
         Scanner scanner = new Scanner(System.in);
@@ -30,7 +30,7 @@ public class Main {
                     UserClass newUser = UserClass.registerUser(socialGraph);
                     if (newUser != null) {
                         allUsers.add(newUser);
-                        saveAllUsers();
+                        UserClass.saveAllUsers(allUsers);
                     }
                     break;
                 case 2:
@@ -49,6 +49,7 @@ public class Main {
     }
 
     private static void userMenu(UserClass currentUser) {
+        UserClass.loadUsers(); // Load all users on startup
         Scanner scanner = new Scanner(System.in);
         int choice;
 
@@ -101,15 +102,16 @@ public class Main {
             switch (choice) {
                 case 1:
                     System.out.print("Enter User ID to send request: ");
-                    int recipientId = scanner.nextInt();
+                    String recipientId = scanner.nextLine();
                     currentUser.sendFriendRequest(socialGraph, recipientId);
                     break;
                 case 2:
                     currentUser.viewFriendRequests(socialGraph);
                     break;
                 case 3:
+                    System.out.println("Friend Requests Received: " + currentUser.getFriendRequestsReceived());
                     System.out.print("Enter Sender User ID: ");
-                    int senderId = scanner.nextInt();
+                    String senderId = scanner.nextLine();
                     System.out.print("Accept request? (true/false): ");
                     boolean accept = scanner.nextBoolean();
                     currentUser.respondToFriendRequest(socialGraph, senderId, accept);
@@ -119,7 +121,7 @@ public class Main {
                     break;
                 case 5:
                     System.out.print("Enter User ID to see mutual friends: ");
-                    int otherUserId = scanner.nextInt();
+                    String otherUserId = scanner.nextLine();
                     currentUser.mutualFriends(socialGraph, otherUserId);
                     break;
                 case 6:
@@ -134,16 +136,4 @@ public class Main {
         } while (choice != 7);
     }
 
-    // Load all users (simulate persistence)
-    private static void loadAllUsers() {
-        // Add logic to load users from files (simulate or use actual files)
-        System.out.println("Loading users...");
-    }
-
-    // Save all users (simulate persistence)
-    private static void saveAllUsers() {
-        // Add logic to save users to files
-
-        System.out.println("Saving users...");
-    }
 }

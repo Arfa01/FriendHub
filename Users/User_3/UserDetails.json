@@ -1,0 +1,20 @@
+{
+  "currentUserId": "0",
+  "userId": "3",
+  "userName": "riazz",
+  "fullName": "Muhammad Riaz",
+  "dateOfBirth": "1867-08-21",
+  "gender": "Male",
+  "emailAddress": "riaz@gmail.com",
+  "password": "1234",
+  "bioDetails": "Retired PAF/ Electrician/ Baker/ avid news-watcher",
+  "userCreationDate": "2024-12-12T20:26:34.5140174",
+  "myPosts": [],
+  "friendRequestsSent": [],
+  "friendRequestsReceived": [],
+  "friendsList": [
+    "4",
+    "1",
+    "5"
+  ]
+}

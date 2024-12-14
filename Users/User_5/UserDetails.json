@@ -1,0 +1,18 @@
+{
+  "currentUserId": "0",
+  "userId": "5",
+  "userName": "whosis",
+  "fullName": "Sana Riaz",
+  "dateOfBirth": "1976-01-30",
+  "gender": "Female",
+  "emailAddress": "sana@gmail.com",
+  "password": "1234",
+  "bioDetails": "i have a camera and i use it to capture pretty things",
+  "userCreationDate": "2024-12-12T21:28:46.5011109",
+  "myPosts": [],
+  "friendRequestsSent": [],
+  "friendRequestsReceived": [],
+  "friendsList": [
+    "3"
+  ]
+}

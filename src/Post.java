@@ -5,17 +5,17 @@ import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Post {
     private static int postCounter = 0;
-    private int postUserId;
-    private int postId;
+    private String postUserId;
+    private String postId;
     private String postContent;
     private LocalDateTime postTimestamp;
     private int likes;
-    private List<String> comments = new ArrayList<>();
+    private List<String> comments;
+    private static Map<String, Post> posts = new HashMap<>();
     private static final String BASE_PATH = "Posts";
     private static final Gson gson = new GsonBuilder().setPrettyPrinting()
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
@@ -24,14 +24,16 @@ public class Post {
 
 
     // Constructor
-    public Post(int postUserId, String postContent) {
+    public Post(String postUserId, String postContent) {
         this.postUserId = postUserId;
         this.postContent = postContent;
-        this.postId = ++postCounter; // Auto-increment post ID
+        this.postId = String.valueOf(++postCounter); // Auto-increment post ID
         this.postTimestamp = LocalDateTime.now();
+        this.comments = new ArrayList<>();
+        this.likes = 0;
     }
 
-    public int getPostId() {
+    public String getPostId() {
         return postId;
     }
 
@@ -52,7 +54,37 @@ public class Post {
     }
 
 
-    public static void viewPostsByUser(int userId) {
+    public static ArrayList<Post> loadPosts() {
+        ArrayList<Post> postsList = new ArrayList<>();
+        File baseDir = new File(BASE_PATH);
+
+        if (baseDir.exists() && baseDir.isDirectory()) {
+            File[] postFolders = baseDir.listFiles(file -> file.isDirectory() && file.getName().startsWith("Post_"));
+
+            if (postFolders != null) {
+                for (File postFolder : postFolders) {
+                    try {
+                        // Load Post Details
+                        File postFile = new File(postFolder, postFolder.getName() + ".json");
+                        if (postFile.exists()) {
+                            try (FileReader reader = new FileReader(postFile)) {
+                                Post post = gson.fromJson(reader, Post.class);
+                                posts.put(post.getPostUserId(), post); // Map by User ID or other logic
+                                postsList.add(post);
+                            }
+                        }
+                    } catch (IOException e) {
+                        System.err.println("Error loading post data from folder: " + postFolder.getName());
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return postsList;
+    }
+
+
+    public static void viewPostsByUser(String userId) {
         Path postsDirectory = Paths.get(BASE_PATH);
         if (Files.exists(postsDirectory)) {
             try {
@@ -82,10 +114,10 @@ public class Post {
     public void addLike() {
         likes++;
     }
-
     public void addComment(String comment) {
         comments.add(comment);
     }
+
 
     public void displayPostDetails() {
         System.out.println("Post ID: " + postId);
@@ -157,4 +189,17 @@ public class Post {
     }
 
 
+    // getters/setters for serialization
+    public String getContent() { return postContent; }
+    public LocalDateTime getTimestamp() { return postTimestamp; }
+    public List<String> getComments() {
+        return comments;
+    }
+    public int getLikes() {
+        return likes;
+    }
+
+    public String getPostUserId() {
+        return postUserId;
+    }
 }

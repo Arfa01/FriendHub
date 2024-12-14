@@ -1,0 +1,22 @@
+{
+  "currentUserId": "0",
+  "userId": "1",
+  "userName": "a_numnum",
+  "fullName": "Anam Riaz",
+  "dateOfBirth": "1990-02-19",
+  "gender": "Female",
+  "emailAddress": "anam@gmail.com",
+  "password": "1234",
+  "bioDetails": "call later, im sleeping",
+  "userCreationDate": "2024-12-12T21:19:38.1367503",
+  "myPosts": [],
+  "friendRequestsSent": [],
+  "friendRequestsReceived": [
+    "4"
+  ],
+  "friendsList": [
+    "4",
+    "2",
+    "3"
+  ]
+}

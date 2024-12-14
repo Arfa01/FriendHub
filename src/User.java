@@ -1,7 +1,9 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -10,8 +12,8 @@ class UserClass {
     private static int idCounter = 1; // Auto-increment user IDs
     private static final String ID_COUNTER_FILE = "idCounter.json"; // Path to store idCounter
     private static UserClass currentUser = null; // Current logged-in user
-    private int currentUserId;
-    private int userId;
+    private String currentUserId;
+    private String userId;
     private String userName;
     private String fullName;
     private LocalDate dateOfBirth;
@@ -20,10 +22,10 @@ class UserClass {
     private String password;
     private String bioDetails;
     private LocalDateTime userCreationDate;
-    private List<Integer> myPosts;  // List of post IDs
-    private List<Integer> friendRequestsSent;
-    private List<Integer> friendRequestsReceived;
-    private List<Integer> friendsList;
+    private List<String> myPosts;  // List of post IDs
+    private List<String> friendRequestsSent;
+    private List<String> friendRequestsReceived;
+    private List<String> friendsList;
     private static final String BASE_PATH = "Users";
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
@@ -48,7 +50,7 @@ class UserClass {
     // Constructor for creating a new user
     public UserClass(String userName, String fullName, LocalDate dateOfBirth, String gender,
                      String emailAddress, String password, String bioDetails) {
-        this.userId = idCounter++;
+        this.userId = String.valueOf(idCounter++);
         saveIdCounter(); // updated idCounter
         this.userName = userName;
         this.fullName = fullName;
@@ -74,27 +76,101 @@ class UserClass {
             File userFolder = new File(BASE_PATH + "/User_" + userId);
             if (!userFolder.exists()) userFolder.mkdirs();
 
+            System.out.println("Saving user data for User ID: " + userId);
+
             // Save User Details
             File userDetailsFile = new File(userFolder, "UserDetails.json");
             try (FileWriter writer = new FileWriter(userDetailsFile)) {
                 gson.toJson(this, writer);
+                System.out.println("UserDetails.json saved.");
             }
 
             // Save Posts, Friend Requests
             saveListToFile(userFolder, "PostIDs.json", myPosts);
+            System.out.println("PostIDs.json: " + myPosts);
             saveListToFile(userFolder, "RequestsSent.json", friendRequestsSent);
+            System.out.println("RequestsSent.json: " + friendRequestsSent);
             saveListToFile(userFolder, "RequestsReceived.json", friendRequestsReceived);
+            System.out.println("RequestsReceived.json: " + friendRequestsReceived);
 
         } catch (IOException e) {
+            System.err.println("Error saving user data for User ID: " + userId);
             e.printStackTrace();
         }
     }
 
-    private void saveListToFile(File folder, String fileName, List<Integer> list) throws IOException {
+    private void saveListToFile(File folder, String fileName, List<String> list) throws IOException {
         File file = new File(folder, fileName);
         try (FileWriter writer = new FileWriter(file)) {
             gson.toJson(list, writer);
+            System.out.println("Saved " + list + " to " + file.getAbsolutePath());
         }
+    }
+
+    //Load User data to file
+    public static ArrayList<UserClass> loadUsers() {
+        ArrayList<UserClass> users = new ArrayList<>();
+        File baseDir = new File(BASE_PATH);
+
+        if (baseDir.exists() && baseDir.isDirectory()) {
+            File[] userFolders = baseDir.listFiles(file -> file.isDirectory() && file.getName().startsWith("User_"));
+
+            if (userFolders != null) {
+                for (File userFolder : userFolders) {
+                    try {
+                        System.out.println("Loading user from folder: " + userFolder.getName());
+                        // Load User Details
+                        File userDetailsFile = new File(userFolder, "UserDetails.json");
+                        if (userDetailsFile.exists()) {
+                            try (FileReader reader = new FileReader(userDetailsFile)) {
+                                UserClass user = gson.fromJson(reader, UserClass.class);
+
+                                // Load Posts, Friend Requests
+                                user.myPosts = loadListFromFile(userFolder, "PostIDs.json");
+                                System.out.println("Loaded PostIDs.json: " + user.myPosts);
+
+                                user.friendRequestsSent = loadListFromFile(userFolder, "RequestsSent.json");
+                                System.out.println("Loaded RequestsSent.json: " + user.friendRequestsSent);
+
+                                user.friendRequestsReceived = loadListFromFile(userFolder, "RequestsReceived.json");
+                                System.out.println("Loaded RequestsReceived.json: " + user.friendRequestsReceived);
+
+                                users.add(user);
+                            }
+                        }
+                    } catch (IOException e) {
+                        System.err.println("Error loading user data from folder: " + userFolder.getName());
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }else {
+            System.err.println("Base directory does not exist.");
+        }
+        return users;
+    }
+
+    private static ArrayList<String> loadListFromFile(File folder, String fileName) {
+        File file = new File(folder, fileName);
+        if (file.exists()) {
+            try (FileReader reader = new FileReader(file)) {
+                Type listType = new TypeToken<ArrayList<String>>() {}.getType();
+                return gson.fromJson(reader, listType);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+
+
+    // Save all users (simulate persistence)
+    public static void saveAllUsers(List<UserClass> allUsers) {
+        for (UserClass user : allUsers) {
+            user.saveUserToFile();
+        }
+        System.out.println("All users have been saved successfully.");
     }
 
 
@@ -180,73 +256,218 @@ class UserClass {
     // Function: Delete Account
     public void deleteAccount(Graph graph) {
         graph.removeNode(this.userId);
+
         System.out.println("Account deleted successfully.");
+        File userFolder = new File(BASE_PATH + "/User_" + this.userId);
+        for (File file : userFolder.listFiles()) file.delete();
+        userFolder.delete();
     }
 
-    // Function: Send Friend Request
-    public void sendFriendRequest(Graph graph, int recipientId) {
-        graph.addConnectionRequest(this.userId, recipientId);
-        System.out.println("Friend request sent to User ID: " + recipientId);
+    private static UserClass findUserById(String userId) {
+        ArrayList<UserClass> allUsers = loadUsers(); // Load all users
+        for (UserClass user : allUsers) {
+            if (user.userId.equals(userId)) {
+                return user; // Return the matching user
+            }
+        }
+        return null; // User not found
     }
+
+
+    // Function: Send Friend Request
+    public void sendFriendRequest(Graph graph, String recipientId) {
+        // Step 1: Validate if the request can be sent
+        if (this.userId.equals(recipientId)) {
+            System.out.println("You cannot send a friend request to yourself.");
+            return;
+        }
+        if (friendRequestsSent.contains(recipientId)) {
+            System.out.println("Friend request already sent to User ID: " + recipientId);
+            return;
+        }
+
+        // Step 2: Add to sender's sent list and recipient's received list
+        this.friendRequestsSent.add(recipientId); // Add recipient to sent list
+        saveUserToFile(); // Save the sender's updated data
+
+        // Step 3: Update recipient user
+        UserClass recipient = findUserById(recipientId); // Helper method to get recipient user
+        if (recipient != null) {
+            recipient.friendRequestsReceived.add(this.userId); // Add sender to recipient's received list
+            this.saveUserToFile();
+            recipient.saveUserToFile(); // Save the recipient's updated data
+
+            // Step 4: Update the graph and notify
+            graph.addConnectionRequest(this.userId, recipientId);
+            System.out.println("Friend request sent successfully to User ID: " + recipientId);
+            saveUserToFile();
+            recipient.saveUserToFile();
+        } else {
+            System.out.println("User ID not found: " + recipientId);
+        }
+    }
+
+    /*
+    public void sendFriendRequest(Graph graph, String recipientId) {
+        graph.addConnectionRequest(this.userId, recipientId);
+        graph.saveGraphToFile("graph.txt");
+    }     */
+
+
+
 
     // Function: View Friend Requests
     public void viewFriendRequests(Graph graph) {
-        List<Integer> requests = graph.viewConnectionRequests(this.userId);
-        System.out.println("Friend Requests Received: " + requests);
+//        List<String> requests = graph.viewConnectionRequests(this.userId);
+//        System.out.println("Friend Requests Received: " + requests);
+        System.out.println("Friend Requests Received: " + friendRequestsReceived);
+
     }
 
     // Function: Accept or Reject Friend Request
-    public void respondToFriendRequest(Graph graph, int senderId, boolean accept) {
+    public void respondToFriendRequest(Graph graph, String senderId, boolean accept) {
+        UserClass sender = findUserById(senderId);
+        if (sender == null) {
+            System.out.println("Error: Sender user not found.");
+            return;
+        }
+
         if (accept) {
+            this.friendsList.add(senderId);
+            sender.friendsList.add(this.userId);
             graph.addConnection(this.userId, senderId);
+            graph.saveGraphToFile();
             System.out.println("Friend request accepted from User ID: " + senderId);
         } else {
             System.out.println("Friend request rejected from User ID: " + senderId);
         }
+        this.friendRequestsReceived.remove(senderId);
+        sender.friendRequestsSent.remove(this.userId);
         graph.removeConnectionRequest(this.userId, senderId);
+        this.saveUserToFile();
+        sender.saveUserToFile();
+
+        updateUserInList(this);
+        updateUserInList(sender);
+    }
+    // Helper method to update the user in allUsers
+    private void updateUserInList(UserClass updatedUser) {
+        for (int i = 0; i < Main.allUsers.size(); i++) {
+            if (Main.allUsers.get(i).getUserId().equals(updatedUser.getUserId())) {
+                Main.allUsers.set(i, updatedUser);
+                break;
+            }
+        }
     }
 
 
     // Function: Unfriend a User
-    public void unFriendUser(Graph graph, int friendId) {
-        graph.removeConnection(this.userId, friendId);
+    public void unFriendUser(Graph graph, String friendId) {
+        //graph.removeConnection(this.userId, friendId);
+        this.friendsList.remove(friendId);
+        findUserById(friendId).friendsList.remove(this.userId);
+        saveUserToFile();
         System.out.println("You have unfriended User ID: " + friendId);
     }
 
 
     // Function: View All Friends
     public void viewAllFriends(Graph graph) {
-        List<Integer> friends = graph.viewConnectionsById(this.userId);
-        System.out.println("Your Friends: " + friends);
+//        List<String> friends = graph.viewConnectionsById(this.userId);
+//        System.out.println("Your Friends: " + friends);
+            System.out.println("Your Friends: " + friendsList);
+
     }
 
 
     // Function: View Mutual Friends
-    public void mutualFriends(Graph graph, int otherUserId) {
-        List<Integer> mutual = graph.viewCommonConnectionsBetweenNodes(this.userId, otherUserId);
+    /*public void mutualFriends(Graph graph, String otherUserId) {
+        List<String> mutual = graph.viewCommonConnectionsBetweenNodes(this.userId, otherUserId);
         System.out.println("Mutual Friends with User ID " + otherUserId + ": " + mutual);
+    }
+     */
+    public void mutualFriends(Graph graph, String otherUserId) {
+        UserClass otherUser = findUserById(otherUserId);
+        if (otherUser == null) {
+            System.out.println("User with ID " + otherUserId + " does not exist.");
+            return;
+        }
+
+        Set<String> myFriends = new HashSet<>(this.friendsList);
+        Set<String> otherFriends = new HashSet<>(otherUser.friendsList);
+
+        myFriends.retainAll(otherFriends); // Find intersection of both sets
+
+        System.out.println("Mutual Friends with User ID " + otherUserId + ": " + myFriends);
     }
 
 
     // Function: Suggested Friends
-    public void suggestedFriends(Graph graph) {
-        List<Integer> suggestions = graph.findNextToAdjacentNodes(this.userId);
+  /*  public void suggestedFriends(Graph graph) {
+        List<String> suggestions = graph.findNextToAdjacentNodes(this.userId);
         System.out.println("Suggested Friends: " + suggestions);
+    }
+*/
+
+    public void suggestedFriends(Graph graph) {
+        PriorityQueue<Suggestion> suggestions = new PriorityQueue<>(Comparator.reverseOrder());
+        Map<String, Integer> suggestionCount = new HashMap<>();
+
+        // Step 1: Iterate through direct friends
+        for (String friendId : this.friendsList) {
+            UserClass friend = findUserById(friendId);
+            if (friend == null) continue;
+
+            // Step 2: Iterate through friends of friends
+            for (String friendsFriendId : friend.friendsList) {
+                if (!friendsFriendId.equals(this.userId) && !this.friendsList.contains(friendsFriendId)) {
+                    suggestionCount.put(friendsFriendId, suggestionCount.getOrDefault(friendsFriendId, 0) + 1);
+                }
+            }
+        }
+
+        // Step 3: Populate Priority Queue with suggestions
+        for (Map.Entry<String, Integer> entry : suggestionCount.entrySet()) {
+            suggestions.add(new Suggestion(entry.getKey(), entry.getValue()));
+        }
+
+        // Step 4: Display Suggested Friends in Priority Order
+        System.out.println("Suggested Friends (priority based on mutual friends):");
+        while (!suggestions.isEmpty()) {
+            Suggestion suggestion = suggestions.poll();
+            System.out.println("User ID: " + suggestion.userId + " | Mutual Friends: " + suggestion.count);
+        }
+    }
+
+    // Helper class for Priority Queue
+    class Suggestion implements Comparable<Suggestion> {
+        String userId;
+        int count;
+
+        public Suggestion(String userId, int count) {
+            this.userId = userId;
+            this.count = count;
+        }
+
+        @Override
+        public int compareTo(Suggestion other) {
+            return Integer.compare(this.count, other.count); // Sort in ascending order
+        }
     }
 
 
     // Function: View Relationship Path
-    public void viewRelationship(Graph graph, int targetUserId) {
-        List<Integer> path = graph.findShortestFriendshipPath(this.userId, targetUserId);
+    public void viewRelationship(Graph graph, String targetUserId) {
+        List<String> path = graph.findShortestFriendshipPath(this.userId, targetUserId);
         System.out.println("Shortest Relationship Path to User ID " + targetUserId + ": " + path);
     }
 
 
     // Function: View Top Influencers
     public static void topInfluencers(Graph graph) {
-        Map<Integer, Integer> scores = graph.calculateInfluenceScores();
+        Map<String, Integer> scores = graph.calculateInfluenceScores();
         scores.entrySet().stream()
-                .sorted(Map.Entry.<Integer, Integer>comparingByValue().reversed())
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .forEach(entry -> System.out.println("User ID: " + entry.getKey() + ", Score: " + entry.getValue()));
     }
 
@@ -256,8 +477,8 @@ class UserClass {
         Post post = new Post(currentUserId, content);
         post.savePostToFile();
         System.out.println("Post created successfully with Post ID: " + post.getPostId());
-//        myPosts.add(post.getPostId());
-//        saveUserToFile(); // Update user data
+        myPosts.add(post.getPostId());
+        saveUserToFile(); // Update user data
     }
 
 
@@ -292,6 +513,8 @@ class UserClass {
             post.addComment("User " + currentUserId + ": " + comment);
             post.savePostToFile(); // Update post file
             System.out.println("Your comment has been added to Post ID: " + postId);
+        }  else {
+            System.out.println("Post ID " + postId + " not found.");
         }
     }
 
@@ -300,6 +523,9 @@ class UserClass {
         System.out.println("All Posts in the System:");
         Post.viewAllPosts();
     }
+
+
+
 
 
     // Simulate a basic menu to demonstrate Post functionalities
@@ -369,7 +595,11 @@ class UserClass {
         return userName;
     }
 
-    public int getUserId() {
+    public String getUserId() {
         return userId;
+    }
+
+    public List<String> getFriendRequestsReceived() {
+        return friendRequestsReceived;
     }
 }
