@@ -1,22 +1,21 @@
 {
-  "currentUserId": "0",
   "userId": "5",
-  "userName": "whosis",
-  "fullName": "Sana Riaz",
-  "dateOfBirth": "1976-01-30",
-  "gender": "Female",
-  "emailAddress": "sana@gmail.com",
-  "password": "1234",
-  "bioDetails": "i have a camera and i use it to capture pretty things",
-  "userCreationDate": "2024-12-12T21:28:46.5011109",
-  "myPosts": [
-    "1",
-    "2",
-    "3"
+  "userName": "High5",
+  "fullName": "High5",
+  "dateOfBirth": "1991-11-11",
+  "gender": "Male",
+  "emailAddress": "five@highfive.com",
+  "password": "securepassword",
+  "bioDetails": "My lucky number is 5",
+  "postCounter": 1,
+  "userCreationDate": "2024-12-16T00:33:49.9794788",
+  "myPosts": [],
+  "friendRequestsSent": [
+    "2"
   ],
-  "friendRequestsSent": [],
   "friendRequestsReceived": [],
+  "friendRequestsRecievedUserNames": [],
   "friendsList": [
-    "3"
+    "2"
   ]
 }

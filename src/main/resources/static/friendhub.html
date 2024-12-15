@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FriendHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            background: #f4f4f4;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        nav button {
+            padding: 10px;
+            border: none;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        nav button:hover {
+            background: #45a049;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background: #f4f4f4;
+        }
+
+        .user-id-input {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .user-id-input input {
+            padding: 10px;
+            width: 60px;
+            margin-left: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .user-id-input label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<!-- Header Section -->
+<header>
+    <h1>FriendHub</h1>
+</header>
+
+<!-- Navigation Bar -->
+<nav>
+    <button onclick="navigate('friendsList')">Friends List</button>
+    <button onclick="navigate('sendFriendRequest')">Send Friend Request</button>
+    <button onclick="navigate('friendRequestsReceived')">Friend Requests Received</button>
+    <button onclick="navigate('myPosts')">My Posts</button>
+    <button onclick="navigate('myFeed')">My Feed</button>
+    <button onclick="navigate('suggestedFriends')">Suggested Friends</button>
+    <button onclick="navigate('mutualFriends')">Mutual Friends</button>
+    <button onclick="navigate('createUser')">Create User</button>
+    <button onclick="navigate('createPost')">Create Post</button>
+</nav>
+
+<!-- User ID Input Section -->
+<!--<div class="user-id-input">-->
+<!--    <label for="userId">Logged In as User ID: </label>-->
+<!--    <input type="text" id="userId" value="1" min="1" onchange="setUserId(this.value)">-->
+<!--</div>-->
+
+<!--<div class="user-id-input">-->
+<!--    <label for="userId">Logged In as User: </label>-->
+<!--    <select id="userId" onchange="setUserId(this.value)">-->
+<!--        <option value="">Loading users...</option>-->
+<!--    </select>-->
+<!--</div>-->
+
+<!-- User ID Input Section -->
+<div class="user-id-input">
+    <label for="userId">Logged In as User ID: </label>
+    <input type="text" id="userId" value="1" min="1" onchange="setUserId(this.value)">
+</div>
+
+<!-- Main Content Section -->
+<main id="content">
+    <h2>Welcome to FriendHub</h2>
+    <p>Select an option from the menu to get started.</p>
+</main>
+
+<!-- JavaScript -->
+<script>
+    let currentUserId = 1;
+
+    // Update the current user ID
+    function setUserId(userId) {
+        currentUserId = parseInt(userId, 10) || 1;
+        alert(`Current User ID updated to: ${currentUserId}`);
+    }
+
+    // Function to navigate between sections
+    function navigate(section) {
+        const content = document.getElementById('content');
+        content.innerHTML = `<h2>Loading ${section}...</h2>`;
+        switch (section) {
+            case 'friendsList':
+                fetchData(`/api/users/${currentUserId}/ViewAllFriends2`, ['Name', 'Id'], 'Friends List');
+                break;
+            case 'sendFriendRequest':
+                content.innerHTML = `
+                    <h2>Send Friend Request</h2>
+                    <input type="text" id="recipientId" placeholder="Enter the userid to send friend request" required><br>
+<!--                    <text id="recipientId" placeholder="Enter the userid to send friend request" required></text><br>-->
+                    <button onclick="createFriendRequest()">Submit</button>`;
+                break;
+            case 'friendRequestsReceived':
+                fetchData(`/api/users/${currentUserId}/friendRequests2`, ['Name', 'Id'], 'Friend Requests Received');
+                break;
+            case 'myPosts':
+                fetchPostData(`/api/users/${currentUserId}/myPosts`, ['UserId', 'postContent', 'postTimestamp'], 'My Posts');                break;
+            case 'myFeed':
+                fetchPostData(`/api/users/${currentUserId}/myFeed`, ['UserId', 'postContent', 'postTimestamp'], 'My Feed');                break;
+                break;
+            case 'suggestedFriends':
+                fetchData(`/api/users/${currentUserId}/viewSuggestedFriends`, ['Name', 'Id'], 'Suggested Friends');
+                break;
+            case 'mutualFriends':
+                const otherUserId = prompt('Enter the other user ID:');
+                if (otherUserId) {
+                    fetchData(`/api/users/${currentUserId}/viewMutualFriends/${otherUserId}`, ['Name', 'Id'], 'Mutual Friends');
+                } else {
+                    content.innerHTML = `<h2>Mutual Friends</h2><p>No User ID provided.</p>`;
+                }
+                break;
+            case 'createUser':
+                content.innerHTML = `
+                    <h2>Create New User</h2>
+                    <form id="createUserForm">
+                        <input type="text" name="name" placeholder="Name" required><br>
+                        <input type="text" name="gender" placeholder="Gender" required><br>
+                        <input type="date" name="dob" required><br>
+                        <input type="email" name="email" placeholder="Email" required><br>
+                        <textarea name="bio" placeholder="Bio" required></textarea><br>
+                        <button type="button" onclick="createUser()">Submit</button>
+                    </form>`;
+                break;
+            case 'createPost':
+                content.innerHTML = `
+                    <h2>Create Post</h2>
+                    <textarea id="postContent" placeholder="Write your post..." required></textarea><br>
+                    <button onclick="createPost()">Submit</button>`;
+                break;
+            default:
+                content.innerHTML = '<h2>Page Not Found</h2>';
+        }
+    }
+
+async function fetchPostData(url, columns, title) {
+    const content = document.getElementById('content');
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // Log the data to the console
+        console.log('Fetched Data:', data);
+
+        renderPostTable(content, title, data, columns);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        content.innerHTML = `<h2>${title}</h2><p>Error loading data.</p>`;
+    }
+}
+
+    // Helper function to fetch data and render a table
+    async function fetchData(url, columns, title) {
+        const content = document.getElementById('content');
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            renderTable(content, title, data, columns);
+        } catch (error) {
+            content.innerHTML = `<h2>${title}</h2><p>Error loading data.</p>`;
+        }
+    }
+
+  function renderPostTable(container, title, data, columns) {
+    container.innerHTML = `<h2>${title}</h2>`;
+    if (data && data.length > 0) {
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const tbody = document.createElement('tbody');
+
+        // Create table headers
+        const headerRow = document.createElement('tr');
+        columns.forEach(col => {
+            const th = document.createElement('th');
+            th.textContent = col; // Display user-friendly column name
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+
+        // Create table rows
+        data.forEach(row => {
+            const rowEl = document.createElement('tr');
+            columns.forEach(col => {
+                const td = document.createElement('td');
+                // Access the exact key in the JSON response
+                td.textContent = row[col] || ''; // Fallback to empty string if key doesn't exist
+                rowEl.appendChild(td);
+            });
+            tbody.appendChild(rowEl);
+        });
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        container.appendChild(table);
+    } else {
+        container.innerHTML += '<p>No data available.</p>';
+    }
+}
+
+    // Render a table with fetched data
+    function renderTable(container, title, data, columns) {
+        container.innerHTML = `<h2>${title}</h2>`;
+        if (data && data.length > 0) {
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            const headerRow = document.createElement('tr');
+            columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            data.forEach(row => {
+                const rowEl = document.createElement('tr');
+                columns.forEach(col => {
+                    const td = document.createElement('td');
+                    td.textContent = row[col.toLowerCase().replace(' ', '')];
+                    rowEl.appendChild(td);
+                });
+                tbody.appendChild(rowEl);
+            });
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            container.appendChild(table);
+        } else {
+            container.innerHTML += '<p>No data available.</p>';
+        }
+    }
+
+    // Placeholder functions for Create User and Create Post
+function createUser() {
+    // Retrieve form data
+    const form = document.getElementById('createUserForm');
+
+    // Extract values from the form inputs
+    const userName = form.name.value.trim();       // Assuming userName can be derived from name
+    const fullName = form.name.value.trim();       // Full name same as input 'name' for now
+    const dateOfBirth = form.dob.value;            // Date of Birth
+    const gender = form.gender.value.trim();       // Gender
+    const emailAddress = form.email.value.trim();  // Email
+    const password = "securepassword";             // Hardcoded for this example
+    const bioDetails = form.bio.value.trim();      // Bio details
+
+    // Construct the request payload
+    const payload = {
+        userName: userName,
+        fullName: fullName,
+        dateOfBirth: dateOfBirth,
+        gender: gender,
+        emailAddress: emailAddress,
+        password: password,  // Replace this with a user-provided password if needed
+        bioDetails: bioDetails
+    };
+
+    // Send POST request using fetch API
+    fetch('http://localhost:8081/api/users/createUser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload) // Convert JS object to JSON string
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        return response;
+    })
+    .then(data => {
+        // Handle success response
+        console.log('User created successfully:', data);
+        alert('User created successfully!');
+    })
+    .catch(error => {
+        // Handle errors
+        console.error('Error creating user:', error);
+        alert('Failed to create user: ' + error.message);
+    });
+}
+
+    // Function to send POST request to the server
+function createFriendRequest() {
+  const recipientId = document.getElementById('recipientId').value;
+  const url = `api/users/${currentUserId}/sendFriendRequest`;
+
+  // Sending the POST request using fetch API
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ recipientId: recipientId })  // Updated to send postContent as the key
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response;
+  })
+  .then(data => {
+    console.log('Friend Request Send successfully:', data);
+    alert('Friend Request Send successfully!');
+  })
+  .catch(error => {
+    console.error('Error creating friend request:', error);
+    alert('Failed to send friend Request.');
+  });
+}
+
+    // Function to send POST request to the server
+function createPost() {
+  const postContent = document.getElementById('postContent').value;
+  const url = `api/users/${currentUserId}/createPost`;
+
+  // Sending the POST request using fetch API
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ postContent: postContent })  // Updated to send postContent as the key
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response;
+  })
+  .then(data => {
+    console.log('Post created successfully:', data);
+    alert('Post created successfully!');
+  })
+  .catch(error => {
+    console.error('Error creating post:', error);
+    alert('Failed to create post.');
+  });
+}
+    // Fetch users from the API and populate the dropdown
+    async function populateUserDropdown() {
+        const userDropdown = document.getElementById('userId');
+        try {
+            const response = await fetch('/api/users/getAllUsers');
+            if (!response.ok) {
+                throw new Error('Failed to fetch users.');
+            }
+            const users = await response.json();
+
+            // Clear the dropdown and add a default option
+            userDropdown.innerHTML = '<option value="">Select a user</option>';
+
+            // Populate the dropdown with user data
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} (ID: ${user.id})`;
+                userDropdown.appendChild(option);
+            });
+
+            // Set the currently logged-in user if available
+            const currentUserId = localStorage.getItem('currentUserId') || 1;
+            userDropdown.value = currentUserId;
+        } catch (error) {
+            console.error('Error loading users:', error);
+            userDropdown.innerHTML = '<option value="">Error loading users</option>';
+        }
+    }
+
+    // Set the current user and reload the page
+<!--    function setUserId(userId) {-->
+<!--        if (userId) {-->
+<!--            localStorage.setItem('currentUserId', userId);-->
+<!--            alert(`User changed to ID: ${userId}`); // Alert on user change-->
+<!--            location.reload(); // Reload the page to reflect the user change-->
+<!--        }-->
+<!--    }-->
+
+    // Populate the dropdown when the page loads
+    document.addEventListener('DOMContentLoaded', populateUserDropdown);
+</script>
+</body>
+</html>

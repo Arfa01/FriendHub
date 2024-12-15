@@ -1,20 +1,26 @@
 {
-  "currentUserId": "0",
   "userId": "3",
-  "userName": "riazz",
-  "fullName": "Muhammad Riaz",
-  "dateOfBirth": "1867-08-21",
-  "gender": "Male",
-  "emailAddress": "riaz@gmail.com",
-  "password": "1234",
-  "bioDetails": "Retired PAF/ Electrician/ Baker/ avid news-watcher",
-  "userCreationDate": "2024-12-12T20:26:34.5140174",
+  "userName": "arfa",
+  "fullName": "arfa Riaz",
+  "dateOfBirth": "2007-08-18",
+  "gender": "Female",
+  "emailAddress": "ws@example.com",
+  "password": "securepassword",
+  "bioDetails": "Loves coding and football",
+  "postCounter": 1,
+  "userCreationDate": "2024-12-15T16:30:10.8713457",
   "myPosts": [],
-  "friendRequestsSent": [],
-  "friendRequestsReceived": [],
+  "friendRequestsSent": [
+    "1"
+  ],
+  "friendRequestsReceived": [
+    "2"
+  ],
+  "friendRequestsRecievedUserNames": [
+    "2"
+  ],
   "friendsList": [
-    "4",
     "1",
-    "5"
+    "2"
   ]
 }

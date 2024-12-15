@@ -1,22 +1,28 @@
 {
-  "currentUserId": "0",
   "userId": "1",
-  "userName": "a_numnum",
-  "fullName": "Anam Riaz",
-  "dateOfBirth": "1990-02-19",
-  "gender": "Female",
-  "emailAddress": "anam@gmail.com",
-  "password": "1234",
-  "bioDetails": "call later, im sleeping",
-  "userCreationDate": "2024-12-12T21:19:38.1367503",
+  "userName": "waqas123",
+  "fullName": "Waqas Riaz",
+  "dateOfBirth": "2000-08-18",
+  "gender": "Male",
+  "emailAddress": "waqas@example.com",
+  "password": "securepassword",
+  "bioDetails": "Loves coding and football",
+  "postCounter": 3,
+  "userCreationDate": "2024-12-15T15:43:02.6263092",
   "myPosts": [],
-  "friendRequestsSent": [],
+  "friendRequestsSent": [
+    "4",
+    "5"
+  ],
   "friendRequestsReceived": [
-    "4"
+    "3",
+    "2"
+  ],
+  "friendRequestsRecievedUserNames": [
+    "3",
+    "2"
   ],
   "friendsList": [
-    "4",
-    "2",
     "3"
   ]
 }

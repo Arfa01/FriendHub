@@ -1,24 +1,19 @@
 {
-  "currentUserId": "0",
   "userId": "4",
-  "userName": "arf",
-  "fullName": "Arfa Riaz",
-  "dateOfBirth": "2017-01-20",
-  "gender": "Female",
-  "emailAddress": "arfariaz@gmail.com",
-  "password": "1234",
-  "bioDetails": "making this project, hope it turns out good uwu ",
-  "userCreationDate": "2024-12-12T20:28:04.2012433",
-  "myPosts": [
-    "2"
-  ],
-  "friendRequestsSent": [
+  "userName": "Random User",
+  "fullName": "Random User",
+  "dateOfBirth": "1992-04-04",
+  "gender": "Male",
+  "emailAddress": "randuser@rand.io",
+  "password": "securepassword",
+  "bioDetails": "Hey .... I am random",
+  "postCounter": 0,
+  "userCreationDate": "2024-12-16T00:29:35.7927425",
+  "myPosts": [],
+  "friendRequestsSent": [],
+  "friendRequestsReceived": [
     "1"
   ],
-  "friendRequestsReceived": [],
-  "friendsList": [
-    "2",
-    "3",
-    "1"
-  ]
+  "friendRequestsRecievedUserNames": [],
+  "friendsList": []
 }
