@@ -9,6 +9,13 @@ import java.util.*;
 
 public class Post {
     private static int postCounter = 0;
+    private static final String POST_COUNTER_FILE = "postCounter.json"; // File to store postCounter
+    private static final String BASE_PATH = "Posts"; // Base directory for post storage
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting()
+            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .create();
+
     private String postUserId;
     private String postId;
     private String postContent;
@@ -16,11 +23,24 @@ public class Post {
     private int likes;
     private List<String> comments;
     private static Map<String, Post> posts = new HashMap<>();
-    private static final String BASE_PATH = "Posts";
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting()
-            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
-            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-            .create();
+    // Load postCounter from file
+    private static void loadPostCounter() {
+        try (FileReader reader = new FileReader(POST_COUNTER_FILE)) {
+            Integer counterValue = gson.fromJson(reader, Integer.class);
+            postCounter = (counterValue != null) ? counterValue : 0;
+        } catch (IOException e) {
+            postCounter = 0; // Default to 0 if file doesn't exist
+        }
+    }
+
+    // Save postCounter to file
+    private static void savePostCounter() {
+        try (FileWriter writer = new FileWriter(POST_COUNTER_FILE)) {
+            gson.toJson(postCounter, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     // Constructor
@@ -31,6 +51,7 @@ public class Post {
         this.postTimestamp = LocalDateTime.now();
         this.comments = new ArrayList<>();
         this.likes = 0;
+        savePostCounter();
     }
 
     public String getPostId() {
@@ -55,6 +76,7 @@ public class Post {
 
 
     public static ArrayList<Post> loadPosts() {
+        loadPostCounter();
         ArrayList<Post> postsList = new ArrayList<>();
         File baseDir = new File(BASE_PATH);
 

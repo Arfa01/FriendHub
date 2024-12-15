@@ -17,14 +17,14 @@ class Graph {
         if (!adjacencyList.containsKey(id)) {
             adjacencyList.put(id, new HashSet<>());
             connectionRequests.putIfAbsent(id, new HashSet<>());
-            System.out.println("Node " + id + " added.");
+            //System.out.println("Node " + id + " added.");
         } else {
-            System.out.println("Node " + id + " already exists.");
+            //System.out.println("Node " + id + " already exists.");
         }
     }
 
     // Remove a node and all its connections
-    public void removeNode(String id) {
+  /*  public void removeNode(String id) {
         if (adjacencyList.containsKey(id)) {
             adjacencyList.remove(id);
             for (Set<String> connections : adjacencyList.values()) {
@@ -35,7 +35,7 @@ class Graph {
             System.out.println("Node " + id + " does not exist.");
         }
     }
-
+*/
     // Add a connection between two nodes
     public void addConnection(String id1, String id2) {
         adjacencyList.putIfAbsent(id1, new HashSet<>());
@@ -44,12 +44,12 @@ class Graph {
             adjacencyList.get(id1).add(id2);
             adjacencyList.get(id2).add(id1);
             removeConnectionRequest(id1, id2);
-            System.out.println("Connection added between " + id1 + " and " + id2);
+            //System.out.println("Connection added between " + id1 + " and " + id2);
         } else {
             System.out.println("One or both nodes do not exist.");
         }
     }
-
+/*
     // Remove a connection between two nodes
     public void removeConnection(String id1, String id2) {
         if (adjacencyList.containsKey(id1) && adjacencyList.get(id1).contains(id2)) {
@@ -101,7 +101,7 @@ class Graph {
 
         //System.out.println("Next-to-adjacent nodes of " + id + ": " + nextToAdjacent);
         return new ArrayList<>(nextToAdjacent);
-    }
+    } */
 
     // Load graph from a file
     public void loadGraphFromFile() {
@@ -125,7 +125,7 @@ class Graph {
                     }
                 }
             }
-            System.out.println("Graph loaded from file: " + filename);
+            //System.out.println("Graph loaded from file: " + filename);
         } catch (IOException e) {
             System.out.println("Error loading graph from file: " + e.getMessage());
         }
@@ -156,7 +156,7 @@ class Graph {
     }
 
 
-
+/*
     // Add a connection request from one node to another
     public void addConnectionRequest(String id1, String id2) {
         if (id1.equals(id2)) {
@@ -179,7 +179,7 @@ class Graph {
             //System.out.println("No connection requests for node " + id);
             return null;
         }
-    }
+    } */
 
     public void removeConnectionRequest(String senderId, String receiverId) {
         if (connectionRequests.containsKey(receiverId)) {
@@ -190,12 +190,12 @@ class Graph {
                 System.out.println("No friend request found from User " + senderId + " to User " + receiverId + ".");
             }
         } else {
-            System.out.println("User " + receiverId + " has no pending friend requests.");
+            //System.out.println("User " + receiverId + " has no pending friend requests.");
         }
     }
 
 
-
+/*
 
     //EXTRA FUNCTIONS
 
@@ -236,7 +236,7 @@ class Graph {
         }
         return influenceScores;
     }
-
+*/
 
 }
 

@@ -1,7 +1,8 @@
 {
-  "postUserId": "2",
-  "postContent": "my post as arf",
-  "postTimestamp": "2024-12-14T13:57:17.5397239",
+  "postUserId": "0",
+  "postId": "2",
+  "postContent": "my 2nd post",
+  "postTimestamp": "2024-12-15T03:00:40.1626278",
   "likes": 0,
   "comments": []
 }

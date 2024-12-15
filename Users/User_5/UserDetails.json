@@ -9,7 +9,11 @@
   "password": "1234",
   "bioDetails": "i have a camera and i use it to capture pretty things",
   "userCreationDate": "2024-12-12T21:28:46.5011109",
-  "myPosts": [],
+  "myPosts": [
+    "1",
+    "2",
+    "3"
+  ],
   "friendRequestsSent": [],
   "friendRequestsReceived": [],
   "friendsList": [

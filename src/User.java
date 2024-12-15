@@ -39,13 +39,13 @@ class UserClass {
 
 
     //Default Constructor
-    public UserClass() {
+ /*   public UserClass() {
         myPosts = new ArrayList<>();
         friendRequestsSent = new ArrayList<>();
         friendRequestsReceived = new ArrayList<>();
         friendsList = new ArrayList<>();
         this.currentUserId = userId;
-    }
+    } */
 
     // Constructor for creating a new user
     public UserClass(String userName, String fullName, LocalDate dateOfBirth, String gender,
@@ -69,6 +69,9 @@ class UserClass {
         saveUserToFile();
     }
 
+    /*
+    * LOAD FUNCTIONS
+    * */
 
     // Save User Data to Files
     public void saveUserToFile() {
@@ -76,22 +79,22 @@ class UserClass {
             File userFolder = new File(BASE_PATH + "/User_" + userId);
             if (!userFolder.exists()) userFolder.mkdirs();
 
-            System.out.println("Saving user data for User ID: " + userId);
+            // System.out.println("Saving user data for User ID: " + userId);
 
             // Save User Details
             File userDetailsFile = new File(userFolder, "UserDetails.json");
             try (FileWriter writer = new FileWriter(userDetailsFile)) {
                 gson.toJson(this, writer);
-                System.out.println("UserDetails.json saved.");
+                // System.out.println("UserDetails.json saved.");
             }
 
             // Save Posts, Friend Requests
             saveListToFile(userFolder, "PostIDs.json", myPosts);
-            System.out.println("PostIDs.json: " + myPosts);
+            // System.out.println("PostIDs.json: " + myPosts);
             saveListToFile(userFolder, "RequestsSent.json", friendRequestsSent);
-            System.out.println("RequestsSent.json: " + friendRequestsSent);
+            // System.out.println("RequestsSent.json: " + friendRequestsSent);
             saveListToFile(userFolder, "RequestsReceived.json", friendRequestsReceived);
-            System.out.println("RequestsReceived.json: " + friendRequestsReceived);
+            // System.out.println("RequestsReceived.json: " + friendRequestsReceived);
 
         } catch (IOException e) {
             System.err.println("Error saving user data for User ID: " + userId);
@@ -103,7 +106,7 @@ class UserClass {
         File file = new File(folder, fileName);
         try (FileWriter writer = new FileWriter(file)) {
             gson.toJson(list, writer);
-            System.out.println("Saved " + list + " to " + file.getAbsolutePath());
+            //System.out.println("Saved " + list + " to " + file.getAbsolutePath());
         }
     }
 
@@ -118,7 +121,7 @@ class UserClass {
             if (userFolders != null) {
                 for (File userFolder : userFolders) {
                     try {
-                        System.out.println("Loading user from folder: " + userFolder.getName());
+                        // System.out.println("Loading user from folder: " + userFolder.getName());
                         // Load User Details
                         File userDetailsFile = new File(userFolder, "UserDetails.json");
                         if (userDetailsFile.exists()) {
@@ -127,13 +130,13 @@ class UserClass {
 
                                 // Load Posts, Friend Requests
                                 user.myPosts = loadListFromFile(userFolder, "PostIDs.json");
-                                System.out.println("Loaded PostIDs.json: " + user.myPosts);
+                                // System.out.println("Loaded PostIDs.json: " + user.myPosts);
 
                                 user.friendRequestsSent = loadListFromFile(userFolder, "RequestsSent.json");
-                                System.out.println("Loaded RequestsSent.json: " + user.friendRequestsSent);
+                                // System.out.println("Loaded RequestsSent.json: " + user.friendRequestsSent);
 
                                 user.friendRequestsReceived = loadListFromFile(userFolder, "RequestsReceived.json");
-                                System.out.println("Loaded RequestsReceived.json: " + user.friendRequestsReceived);
+                                // System.out.println("Loaded RequestsReceived.json: " + user.friendRequestsReceived);
 
                                 users.add(user);
                             }
@@ -163,6 +166,16 @@ class UserClass {
         return new ArrayList<>();
     }
 
+
+    private static Map<String, UserClass> loadAllUsersIntoMap() {
+        Map<String, UserClass> usersMap = new HashMap<>();
+        ArrayList<UserClass> allUsers = loadUsers();
+
+        for (UserClass user : allUsers) {
+            usersMap.put(user.getUserId(), user);
+        }
+        return usersMap;
+    }
 
 
     // Save all users (simulate persistence)
@@ -194,6 +207,7 @@ class UserClass {
     }
 
 
+/*  USER MANAGEMENT  */
 
     // Function: User Creation
     public static UserClass registerUser(Graph graph) {
@@ -254,14 +268,57 @@ class UserClass {
 
 
     // Function: Delete Account
-    public void deleteAccount(Graph graph) {
-        graph.removeNode(this.userId);
+    public void deleteAccount() {
+        // Remove friend connections
+        for (String friendId : this.friendsList) {
+            UserClass friend = findUserById(friendId);
+            if (friend != null) {
+                friend.friendsList.remove(this.userId);
+                friend.saveUserToFile(); // Save the friend's updated details
+            }
+        }
 
-        System.out.println("Account deleted successfully.");
+        // Remove friend requests sent
+        for (String sentId : this.friendRequestsSent) {
+            UserClass recipient = findUserById(sentId);
+            if (recipient != null) {
+                recipient.friendRequestsReceived.remove(this.userId);
+                recipient.saveUserToFile();
+            }
+        }
+
+        // Remove friend requests received
+        for (String receivedId : this.friendRequestsReceived) {
+            UserClass sender = findUserById(receivedId);
+            if (sender != null) {
+                sender.friendRequestsSent.remove(this.userId);
+                sender.saveUserToFile();
+            }
+        }
+
+        // Delete all posts created by this user
+        for (String postId : this.myPosts) {
+            Post.deletePostById(Integer.parseInt(postId));
+        }
+
+        // Delete user's folder and files
         File userFolder = new File(BASE_PATH + "/User_" + this.userId);
-        for (File file : userFolder.listFiles()) file.delete();
-        userFolder.delete();
+        if (userFolder.exists()) {
+            for (File file : userFolder.listFiles()) {
+                if (!file.delete()) {
+                    System.err.println("Failed to delete file: " + file.getName());
+                }
+            }
+            if (userFolder.delete()) {
+                System.out.println("User account and data deleted successfully.");
+            } else {
+                System.err.println("Failed to delete user folder.");
+            }
+        } else {
+            System.err.println("User folder does not exist.");
+        }
     }
+
 
     private static UserClass findUserById(String userId) {
         ArrayList<UserClass> allUsers = loadUsers(); // Load all users
@@ -273,10 +330,11 @@ class UserClass {
         return null; // User not found
     }
 
+    /* FRIEND MANAGEMENT */
 
     // Function: Send Friend Request
     public void sendFriendRequest(Graph graph, String recipientId) {
-        // Step 1: Validate if the request can be sent
+        //Validate if the request can be sent
         if (this.userId.equals(recipientId)) {
             System.out.println("You cannot send a friend request to yourself.");
             return;
@@ -286,19 +344,19 @@ class UserClass {
             return;
         }
 
-        // Step 2: Add to sender's sent list and recipient's received list
+        //Add to sender's sent list and recipient's received list
         this.friendRequestsSent.add(recipientId); // Add recipient to sent list
         saveUserToFile(); // Save the sender's updated data
 
-        // Step 3: Update recipient user
+        //Update recipient user
         UserClass recipient = findUserById(recipientId); // Helper method to get recipient user
         if (recipient != null) {
             recipient.friendRequestsReceived.add(this.userId); // Add sender to recipient's received list
             this.saveUserToFile();
             recipient.saveUserToFile(); // Save the recipient's updated data
 
-            // Step 4: Update the graph and notify
-            graph.addConnectionRequest(this.userId, recipientId);
+            //notify
+//            graph.addConnectionRequest(this.userId, recipientId);
             System.out.println("Friend request sent successfully to User ID: " + recipientId);
             saveUserToFile();
             recipient.saveUserToFile();
@@ -306,13 +364,6 @@ class UserClass {
             System.out.println("User ID not found: " + recipientId);
         }
     }
-
-    /*
-    public void sendFriendRequest(Graph graph, String recipientId) {
-        graph.addConnectionRequest(this.userId, recipientId);
-        graph.saveGraphToFile("graph.txt");
-    }     */
-
 
 
 
@@ -325,7 +376,7 @@ class UserClass {
     }
 
     // Function: Accept or Reject Friend Request
-    public void respondToFriendRequest(Graph graph, String senderId, boolean accept) {
+    public void respondToFriendRequest(String senderId, boolean accept) {
         UserClass sender = findUserById(senderId);
         if (sender == null) {
             System.out.println("Error: Sender user not found.");
@@ -335,15 +386,12 @@ class UserClass {
         if (accept) {
             this.friendsList.add(senderId);
             sender.friendsList.add(this.userId);
-            graph.addConnection(this.userId, senderId);
-            graph.saveGraphToFile();
             System.out.println("Friend request accepted from User ID: " + senderId);
         } else {
             System.out.println("Friend request rejected from User ID: " + senderId);
         }
         this.friendRequestsReceived.remove(senderId);
         sender.friendRequestsSent.remove(this.userId);
-        graph.removeConnectionRequest(this.userId, senderId);
         this.saveUserToFile();
         sender.saveUserToFile();
 
@@ -362,12 +410,24 @@ class UserClass {
 
 
     // Function: Unfriend a User
-    public void unFriendUser(Graph graph, String friendId) {
-        //graph.removeConnection(this.userId, friendId);
+    public void unFriendUser(String friendId) {
+        if (!this.friendsList.contains(friendId)) {
+            System.out.println("User ID " + friendId + " is not in your friends list.");
+            return;
+        }
+
         this.friendsList.remove(friendId);
-        findUserById(friendId).friendsList.remove(this.userId);
         saveUserToFile();
-        System.out.println("You have unfriended User ID: " + friendId);
+
+        UserClass friend = findUserById(friendId);
+        if (friend != null) {
+            friend.friendsList.remove(this.userId);
+            friend.saveUserToFile(); // Update the friend's data file
+        } else {
+            System.out.println("Error: Friend with ID " + friendId + " not found.");
+        }
+
+        System.out.println("You have successfully unfriended User ID: " + friendId);
     }
 
 
@@ -375,17 +435,13 @@ class UserClass {
     public void viewAllFriends(Graph graph) {
 //        List<String> friends = graph.viewConnectionsById(this.userId);
 //        System.out.println("Your Friends: " + friends);
-            System.out.println("Your Friends: " + friendsList);
+        System.out.println("Your Friends: " + friendsList);
 
     }
 
 
     // Function: View Mutual Friends
-    /*public void mutualFriends(Graph graph, String otherUserId) {
-        List<String> mutual = graph.viewCommonConnectionsBetweenNodes(this.userId, otherUserId);
-        System.out.println("Mutual Friends with User ID " + otherUserId + ": " + mutual);
-    }
-     */
+
     public void mutualFriends(Graph graph, String otherUserId) {
         UserClass otherUser = findUserById(otherUserId);
         if (otherUser == null) {
@@ -403,12 +459,6 @@ class UserClass {
 
 
     // Function: Suggested Friends
-  /*  public void suggestedFriends(Graph graph) {
-        List<String> suggestions = graph.findNextToAdjacentNodes(this.userId);
-        System.out.println("Suggested Friends: " + suggestions);
-    }
-*/
-
     public void suggestedFriends(Graph graph) {
         PriorityQueue<Suggestion> suggestions = new PriorityQueue<>(Comparator.reverseOrder());
         Map<String, Integer> suggestionCount = new HashMap<>();
@@ -457,20 +507,82 @@ class UserClass {
 
 
     // Function: View Relationship Path
-    public void viewRelationship(Graph graph, String targetUserId) {
-        List<String> path = graph.findShortestFriendshipPath(this.userId, targetUserId);
-        System.out.println("Shortest Relationship Path to User ID " + targetUserId + ": " + path);
+    public void viewRelationship(String targetUserId) {
+        // Load all users into a map for easier access
+        Map<String, UserClass> usersMap = loadAllUsersIntoMap();
+
+        // Check if both users exist
+        if (!usersMap.containsKey(this.userId) || !usersMap.containsKey(targetUserId)) {
+            System.out.println("One or both user IDs do not exist.");
+            return;
+        }
+
+        // Perform BFS to find the shortest path
+        Queue<List<String>> queue = new LinkedList<>();
+        Set<String> visited = new HashSet<>();
+
+        // Start the BFS from the current user
+        queue.add(Arrays.asList(this.userId));
+
+        while (!queue.isEmpty()) {
+            List<String> path = queue.poll();
+            String current = path.get(path.size() - 1);
+
+            if (current.equals(targetUserId)) {
+                System.out.println("Shortest Relationship Path to User ID " + targetUserId + ": " + path);
+                return;
+            }
+
+            if (!visited.contains(current)) {
+                visited.add(current);
+
+                // Get the friends list of the current user
+                UserClass currentUser = usersMap.get(current);
+                for (String neighbor : currentUser.friendsList) {
+                    if (!visited.contains(neighbor)) {
+                        List<String> newPath = new ArrayList<>(path);
+                        newPath.add(neighbor);
+                        queue.add(newPath);
+                    }
+                }
+            }
+        }
+
+        System.out.println("No relationship path exists between User ID " + this.userId + " and User ID " + targetUserId);
     }
+
 
 
     // Function: View Top Influencers
-    public static void topInfluencers(Graph graph) {
-        Map<String, Integer> scores = graph.calculateInfluenceScores();
-        scores.entrySet().stream()
+    public static void topInfluencers() {
+        Map<String, UserClass> usersMap = loadAllUsersIntoMap();
+
+        // Calculate influence scores for each user
+        Map<String, Integer> influenceScores = new HashMap<>();
+        for (UserClass user : usersMap.values()) {
+            int score = calculateInfluenceScore(user);
+            influenceScores.put(user.getUserId(), score);
+        }
+
+        // Sort and display the top influencers
+        System.out.println("\n=== Top Influencers ===");
+        influenceScores.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .forEach(entry -> System.out.println("User ID: " + entry.getKey() + ", Score: " + entry.getValue()));
+                .forEach(entry -> System.out.println("User ID: " + entry.getKey() + ", Influence Score: " + entry.getValue()));
+    }
+    private static int calculateInfluenceScore(UserClass user) {
+        int friendsWeight = 2; // Weight for number of friends
+        int postsWeight = 1;   // Weight for number of posts
+
+        int numFriends = user.friendsList.size();
+        int numPosts = user.myPosts.size();
+
+        // Calculate weighted influence score
+        return (numFriends * friendsWeight) + (numPosts * postsWeight);
     }
 
+
+    /* POST MANAGEMENT */
 
     // Function: create a new post
     public void createPost(String content) {
