@@ -37,7 +37,7 @@ friendhub/
 ├── README.md
 
 
-## Sample Postmsn Endpoints
+## Sample Postman Endpoints
 
 | Method | Endpoint                  | Description                 |
 |--------|---------------------------|-----------------------------|
