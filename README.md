@@ -1,4 +1,4 @@
-<img width="605" height="130" alt="fr 4" src="https://github.com/user-attachments/assets/e054e1fd-3fa9-48f5-af65-ebef8f2b38ec" /># FriendHub – Social Network Simulation API
+# FriendHub – Social Network Simulation API
 
 A Java + Spring Boot-based REST API that simulates a basic social media platform with features like user registration, friend requests, posts, and graph-based relationship analysis.
 
